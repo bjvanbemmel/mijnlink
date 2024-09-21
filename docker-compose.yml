@@ -2,6 +2,8 @@ services:
   go:
     image: cosmtrek/air
     working_dir: /app
+    env_file:
+      - .env
     environment:
       air_wd: "/app"
     volumes:
