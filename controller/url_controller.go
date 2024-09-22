@@ -13,8 +13,6 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-const URI_PREFIX string = "https://mijnl.ink/"
-
 var (
 	ErrInvalidKey     = errors.New("given key is invalid")
 	ErrInvalidRequest = errors.New("invalid request body")
@@ -23,6 +21,7 @@ var (
 )
 
 type URLController struct {
+	URLPrefix  string
 	URLService service.URLService
 }
 
@@ -53,7 +52,7 @@ func (c URLController) saveURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.New(w, URI_PREFIX+key, http.StatusOK)
+	response.New(w, c.URLPrefix+key, http.StatusOK)
 }
 
 func (c URLController) getURL(w http.ResponseWriter, r *http.Request) {

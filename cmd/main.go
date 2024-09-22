@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,6 +17,10 @@ import (
 const (
 	TIMEOUT_DURATION = time.Second * 3
 	URL_FILE_PATH    = ".index"
+)
+
+var (
+	ErrPrefixNotSet = errors.New("url prefix has not been set")
 )
 
 func main() {
@@ -45,8 +50,14 @@ func main() {
 		Mutex:    &sync.Mutex{},
 	}
 
+	prefix := os.Getenv("URL_PREFIX")
+	if prefix == "" {
+		panic(ErrPrefixNotSet)
+	}
+
 	urlctrl := controller.URLController{
 		URLService: urlsrv,
+		URLPrefix:  prefix,
 	}
 	urlctrl.InitRoutes(r)
 
