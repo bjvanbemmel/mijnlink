@@ -32,7 +32,7 @@ func (c FileController) saveFile(w http.ResponseWriter, r *http.Request) {
 
 	file, _, err := r.FormFile("file")
 	if err != nil {
-		response.New(w, err.Error(), http.StatusInternalServerError)
+		response.New(w, ErrInvalidRequest.Error(), http.StatusBadRequest)
 		return
 	}
 
