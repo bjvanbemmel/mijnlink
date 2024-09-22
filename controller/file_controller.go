@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
+	"regexp"
 
 	"github.com/bjvanbemmel/mijnlink/response"
 	"github.com/bjvanbemmel/mijnlink/service"
@@ -10,6 +13,7 @@ import (
 )
 
 type FileController struct {
+	URLPrefix       string
 	FileService     service.FileService
 	UploadSizeLimit int
 }
@@ -20,6 +24,7 @@ func (c FileController) InitRoutes(r *chi.Mux) {
 		middleware.AllowContentType("multipart/form-data"),
 	)
 	group.Post("/file", c.saveFile)
+	group.Get("/file/{key}", c.getFile)
 }
 
 func (c FileController) saveFile(w http.ResponseWriter, r *http.Request) {
@@ -37,5 +42,26 @@ func (c FileController) saveFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.New(w, res, http.StatusOK)
+	response.New(w, c.URLPrefix+res, http.StatusOK)
+}
+
+func (c FileController) getFile(w http.ResponseWriter, r *http.Request) {
+	key := chi.URLParam(r, "key")
+	pattern := regexp.MustCompile(fmt.Sprintf("[A-z0-9]{%d}", c.FileService.IndexService.KeyLimit))
+
+	if !pattern.MatchString(key) {
+		response.New(w, ErrInvalidKey.Error(), http.StatusBadRequest)
+		return
+	}
+
+	contents, err := c.FileService.GetFileByKey(key)
+	if errors.Is(err, service.ErrNotFound) {
+		response.New(w, err.Error(), http.StatusNotFound)
+		return
+	} else if err != nil {
+		response.New(w, ErrObfuscation.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response.NewFile(w, []byte(contents))
 }

@@ -2,31 +2,65 @@ package service
 
 import (
 	"bufio"
+	"bytes"
 	"compress/gzip"
-	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
 )
 
-type FileService struct{}
+const (
+	TEMP_FILES_DIR = ".files/"
+)
+
+type FileService struct {
+	IndexService IndexService
+}
 
 func (s FileService) SaveFile(file multipart.File) (string, error) {
-	out, err := os.CreateTemp(".files/", "*")
+	out, err := os.CreateTemp(TEMP_FILES_DIR, "*")
 	if err != nil {
 		return "", err
 	}
+	defer out.Close()
 
 	buf := bufio.NewWriter(out)
 	defer buf.Flush()
 
 	gz := gzip.NewWriter(buf)
+	defer gz.Close()
 	defer gz.Flush()
 
-	i, err := io.Copy(buf, file)
+	_, err = io.Copy(gz, file)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("%d bytes written", i), nil
+	return s.IndexService.SaveValue(out.Name())
+}
+
+func (s FileService) GetFileByKey(key string) (string, error) {
+	path, err := s.IndexService.GetValueByKey(key)
+	if err != nil {
+		return "", err
+	}
+
+	file, err := os.OpenFile(path, os.O_RDONLY, 0600)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	gz, err := gzip.NewReader(file)
+	if err != nil {
+		return "", err
+	}
+
+	buf := bufio.NewReader(gz)
+	buffer := bytes.NewBuffer([]byte{})
+	if _, err := io.Copy(buffer, buf); err != nil {
+		return "", err
+	}
+
+	return string(buffer.Bytes()), nil
 }

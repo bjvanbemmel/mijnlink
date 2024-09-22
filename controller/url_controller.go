@@ -44,6 +44,7 @@ func (c URLController) saveURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	trimmedPrefix := strings.Trim(c.URLPrefix, "/")
+	fmt.Println(trimmedPrefix, req.URL)
 	if strings.HasPrefix(req.URL, trimmedPrefix) {
 		response.New(w, ErrUrlNotAllowed.Error(), http.StatusBadRequest)
 		return
@@ -65,7 +66,7 @@ func (c URLController) saveURL(w http.ResponseWriter, r *http.Request) {
 
 func (c URLController) getURL(w http.ResponseWriter, r *http.Request) {
 	key := chi.URLParam(r, "key")
-	pattern := regexp.MustCompile(fmt.Sprintf("[A-z0-9]{%d}", c.URLService.KeyLimit))
+	pattern := regexp.MustCompile(fmt.Sprintf("[A-z0-9]{%d}", c.URLService.IndexService.KeyLimit))
 
 	if !pattern.MatchString(key) {
 		response.New(w, ErrInvalidKey.Error(), http.StatusBadRequest)

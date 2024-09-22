@@ -23,3 +23,9 @@ func New(w http.ResponseWriter, value string, status int) {
 	w.WriteHeader(status)
 	w.Write(res.JSON())
 }
+
+func NewFile(w http.ResponseWriter, value []byte) {
+	w.Header().Add("Content-Type", http.DetectContentType(value))
+	w.WriteHeader(http.StatusOK)
+	w.Write(value)
+}
