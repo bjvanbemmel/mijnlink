@@ -19,6 +19,7 @@ var (
 	ErrInvalidKey     = errors.New("given key is invalid")
 	ErrInvalidRequest = errors.New("invalid request body")
 	ErrInvalidUrl     = errors.New("invalid url given")
+	ErrObfuscation    = errors.New("something went wrong")
 )
 
 type URLController struct {
@@ -48,7 +49,7 @@ func (c URLController) saveURL(w http.ResponseWriter, r *http.Request) {
 
 	key, err := c.URLService.SaveUrl(req.Url)
 	if err != nil {
-		response.New(w, err.Error(), http.StatusInternalServerError)
+		response.New(w, ErrObfuscation.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -69,7 +70,7 @@ func (c URLController) getURL(w http.ResponseWriter, r *http.Request) {
 		response.New(w, err.Error(), http.StatusNotFound)
 		return
 	} else if err != nil {
-		response.New(w, err.Error(), http.StatusInternalServerError)
+		response.New(w, ErrObfuscation.Error(), http.StatusInternalServerError)
 		return
 	}
 
