@@ -12,6 +12,7 @@ import (
 	"github.com/bjvanbemmel/mijnlink/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 const (
@@ -28,6 +29,10 @@ func main() {
 	r.Use(middleware.Timeout(TIMEOUT_DURATION))
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.StripSlashes)
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{"https://*", "http://*"},
+		AllowedMethods: []string{"GET", "POST"},
+	}))
 
 	environment := os.Getenv("ENVIRONMENT")
 	if environment == "debug" {
