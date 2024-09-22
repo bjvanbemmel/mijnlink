@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strings"
 
 	"github.com/bjvanbemmel/mijnlink/response"
 	"github.com/bjvanbemmel/mijnlink/service"
@@ -17,6 +18,7 @@ var (
 	ErrInvalidKey     = errors.New("given key is invalid")
 	ErrInvalidRequest = errors.New("invalid request body")
 	ErrInvalidUrl     = errors.New("invalid url given")
+	ErrUrlNotAllowed  = errors.New("the given url is not allowed")
 	ErrObfuscation    = errors.New("something went wrong")
 )
 
@@ -31,7 +33,7 @@ func (c URLController) InitRoutes(r *chi.Mux) {
 }
 
 type SaveUrlRequest struct {
-	Url string `json:"url"`
+	URL string `json:"url"`
 }
 
 func (c URLController) saveURL(w http.ResponseWriter, r *http.Request) {
@@ -41,12 +43,18 @@ func (c URLController) saveURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := url.ParseRequestURI(req.Url); err != nil {
+	trimmedPrefix := strings.Trim(c.URLPrefix, "/")
+	if strings.HasPrefix(req.URL, trimmedPrefix) {
+		response.New(w, ErrUrlNotAllowed.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if _, err := url.ParseRequestURI(req.URL); err != nil {
 		response.New(w, ErrInvalidUrl.Error(), http.StatusBadRequest)
 		return
 	}
 
-	key, err := c.URLService.SaveUrl(req.Url)
+	key, err := c.URLService.SaveUrl(req.URL)
 	if err != nil {
 		response.New(w, ErrObfuscation.Error(), http.StatusInternalServerError)
 		return
