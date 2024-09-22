@@ -21,7 +21,8 @@ const (
 )
 
 var (
-	ErrPrefixNotSet = errors.New("url prefix has not been set")
+	ErrPrefixNotSet     = errors.New("url prefix has not been set")
+	ErrInvalidSizeLimit = errors.New("invalid upload size limit")
 )
 
 func main() {
@@ -50,7 +51,7 @@ func main() {
 		panic(err)
 	}
 
-	urlsrv := service.URLService{
+	urlsvc := service.URLService{
 		KeyLimit: keyLength,
 		File:     file,
 		Mutex:    &sync.Mutex{},
@@ -62,10 +63,24 @@ func main() {
 	}
 
 	urlctrl := controller.URLController{
-		URLService: urlsrv,
+		URLService: urlsvc,
 		URLPrefix:  prefix,
 	}
 	urlctrl.InitRoutes(r)
+
+	filesvc := service.FileService{}
+
+	li := os.Getenv("UPLOAD_SIZE_LIMIT")
+	limit, err := strconv.Atoi(li)
+	if err != nil {
+		panic(ErrInvalidSizeLimit)
+	}
+
+	filectrl := controller.FileController{
+		FileService:     filesvc,
+		UploadSizeLimit: limit,
+	}
+	filectrl.InitRoutes(r)
 
 	http.ListenAndServe(":80", r)
 }
