@@ -27,6 +27,7 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Timeout(TIMEOUT_DURATION))
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.StripSlashes)
 
 	environment := os.Getenv("ENVIRONMENT")
 	if environment == "debug" {
