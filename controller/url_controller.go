@@ -44,7 +44,6 @@ func (c URLController) saveURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	trimmedPrefix := strings.Trim(c.URLPrefix, "/")
-	fmt.Println(trimmedPrefix, req.URL)
 	if strings.HasPrefix(req.URL, trimmedPrefix) {
 		response.New(w, ErrUrlNotAllowed.Error(), http.StatusBadRequest)
 		return
