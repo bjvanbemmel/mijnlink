@@ -9,16 +9,13 @@ import (
 	"os"
 )
 
-const (
-	TEMP_FILES_DIR = ".files/"
-)
-
 type FileService struct {
 	IndexService IndexService
+	FilesDir     string
 }
 
 func (s FileService) SaveFile(file multipart.File) (string, error) {
-	out, err := os.CreateTemp(TEMP_FILES_DIR, "*")
+	out, err := os.CreateTemp(s.FilesDir, "*")
 	if err != nil {
 		return "", err
 	}

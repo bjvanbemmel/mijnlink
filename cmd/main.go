@@ -73,8 +73,10 @@ func main() {
 	}
 	urlctrl.InitRoutes(r)
 
+	filesDir := os.Getenv("UPLOADED_FILES_DIR")
 	filesvc := service.FileService{
 		IndexService: indexsvc,
+		FilesDir:     filesDir,
 	}
 
 	limit, err := strconv.Atoi(os.Getenv("UPLOAD_SIZE_LIMIT"))
