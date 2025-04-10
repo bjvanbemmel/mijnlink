@@ -2,7 +2,9 @@ package response
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 )
 
 type Result struct {
@@ -26,6 +28,7 @@ func New(w http.ResponseWriter, value string, status int) {
 
 func NewFile(w http.ResponseWriter, value []byte) {
 	w.Header().Add("Content-Type", http.DetectContentType(value))
+	w.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=%d", time.Now().Unix()))
 	w.WriteHeader(http.StatusOK)
 	w.Write(value)
 }
