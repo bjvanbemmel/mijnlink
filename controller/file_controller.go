@@ -30,13 +30,13 @@ func (c FileController) InitRoutes(r *chi.Mux) {
 func (c FileController) saveFile(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm((1024 ^ 3) * int64(c.UploadSizeLimit))
 
-	file, _, err := r.FormFile("file")
+	file, header, err := r.FormFile("file")
 	if err != nil {
 		response.New(w, ErrInvalidRequest.Error(), http.StatusBadRequest)
 		return
 	}
 
-	res, err := c.FileService.SaveFile(file)
+	res, err := c.FileService.SaveFile(file, header)
 	if err != nil {
 		response.New(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -54,7 +54,7 @@ func (c FileController) getFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contents, err := c.FileService.GetFileByKey(key)
+	contents, filename, err := c.FileService.GetFileByKey(key)
 	if errors.Is(err, service.ErrNotFound) {
 		response.New(w, err.Error(), http.StatusNotFound)
 		return
@@ -63,5 +63,5 @@ func (c FileController) getFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.NewFile(w, []byte(contents))
+	response.NewFile(w, []byte(contents), filename)
 }

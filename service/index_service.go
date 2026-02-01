@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"mime/multipart"
 	"os"
 	"strings"
 	"sync"
@@ -22,7 +23,11 @@ var (
 	ErrNotFound    = errors.New("resource not found")
 )
 
-func (s IndexService) SaveValue(value string) (string, error) {
+const (
+	META_DELIMITER string = ";[DELIMITER];"
+)
+
+func (s IndexService) SaveValue(value string, header *multipart.FileHeader) (string, error) {
 	if key, _ := s.GetKeyByValue(value); key != "" {
 		return key, nil
 	}
@@ -42,7 +47,14 @@ func (s IndexService) SaveValue(value string) (string, error) {
 
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
-	line := fmt.Sprintf("%s=%s\n", key, value)
+
+	var line string
+	if header == nil {
+		line = fmt.Sprintf("%s=%s\n", key, value)
+	} else {
+		line = fmt.Sprintf("%s=%s%s{ \"filename\": \"%s\" }\n", key, value, META_DELIMITER, header.Filename)
+	}
+
 	_, err := s.File.WriteString(line)
 
 	return key, err

@@ -5,7 +5,7 @@ type URLService struct {
 }
 
 func (s URLService) SaveUrl(url string) (string, error) {
-	return s.IndexService.SaveValue(url)
+	return s.IndexService.SaveValue(url, nil)
 }
 
 func (s URLService) GetURLByKey(key string) (string, error) {
