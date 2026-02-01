@@ -32,3 +32,10 @@ func NewFile(w http.ResponseWriter, value []byte, filename string) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(value)
 }
+
+func NewFileHeaders(w http.ResponseWriter, filename string) {
+	w.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	w.Header().Add("Access-Control-Expose-Headers", "Content-Disposition")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte{})
+}

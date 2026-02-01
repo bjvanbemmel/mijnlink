@@ -34,7 +34,7 @@ func main() {
 	r.Use(middleware.StripSlashes)
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"https://*", "http://*"},
-		AllowedMethods: []string{"GET", "POST"},
+		AllowedMethods: []string{"GET", "POST", "HEAD"},
 	}))
 
 	environment := os.Getenv("ENVIRONMENT")

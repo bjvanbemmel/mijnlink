@@ -25,6 +25,7 @@ func (c FileController) InitRoutes(r *chi.Mux) {
 	)
 	group.Post("/file", c.saveFile)
 	group.Get("/file/{key}", c.getFile)
+	group.Head("/file/{key}", c.getFile)
 }
 
 func (c FileController) saveFile(w http.ResponseWriter, r *http.Request) {
@@ -46,6 +47,27 @@ func (c FileController) saveFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c FileController) getFile(w http.ResponseWriter, r *http.Request) {
+	key := chi.URLParam(r, "key")
+	pattern := regexp.MustCompile(fmt.Sprintf("[A-z0-9]{%d}", c.FileService.IndexService.KeyLimit))
+
+	if !pattern.MatchString(key) {
+		response.New(w, ErrInvalidKey.Error(), http.StatusBadRequest)
+		return
+	}
+
+	contents, filename, err := c.FileService.GetFileByKey(key)
+	if errors.Is(err, service.ErrNotFound) {
+		response.New(w, err.Error(), http.StatusNotFound)
+		return
+	} else if err != nil {
+		response.New(w, ErrObfuscation.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response.NewFile(w, []byte(contents), filename)
+}
+
+func (c FileController) getFileHeaders(w http.ResponseWriter, r *http.Request) {
 	key := chi.URLParam(r, "key")
 	pattern := regexp.MustCompile(fmt.Sprintf("[A-z0-9]{%d}", c.FileService.IndexService.KeyLimit))
 
