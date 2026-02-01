@@ -25,7 +25,7 @@ func (c FileController) InitRoutes(r *chi.Mux) {
 	)
 	group.Post("/file", c.saveFile)
 	group.Get("/file/{key}", c.getFile)
-	group.Head("/file/{key}", c.getFile)
+	group.Head("/file/{key}", c.getFileHeaders)
 }
 
 func (c FileController) saveFile(w http.ResponseWriter, r *http.Request) {
